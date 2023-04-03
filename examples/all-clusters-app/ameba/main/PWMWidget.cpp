@@ -6,11 +6,13 @@
 #define PWM1 PA_25
 #define PWM2 PA_26
 #define PWM3 PA_30
+#define PWM4 PA_12
 #define PWM_PERIOD 255
 
 pwmout_t pwmRed;
 pwmout_t pwmGreen;
 pwmout_t pwmBlue;
+pwmout_t pwmPa12;
 
 void PWMwidget::pwmInit(void)
 {
@@ -18,16 +20,20 @@ void PWMwidget::pwmInit(void)
     pwmout_init(&pwmRed, PWM1);
     pwmout_init(&pwmBlue, PWM2);
     pwmout_init(&pwmGreen, PWM3);
+    pwmout_init(&pwmPa12, PWM4);
     pwmout_period_us(&pwmRed, PWM_PERIOD);
     pwmout_period_us(&pwmBlue, PWM_PERIOD);
     pwmout_period_us(&pwmGreen, PWM_PERIOD);
+    pwmout_period_us(&pwmPa12, PWM_PERIOD);
     pwmout_pulsewidth_us(&pwmRed,0);
     pwmout_pulsewidth_us(&pwmBlue,255);
-    pwmout_pulsewidth_us(&pwmGreen,255);s
+    pwmout_pulsewidth_us(&pwmGreen,255);
+    pwmout_pulsewidth_us(&pwmPa12,0);
 
     printf("Level Red: %d!\n", 0);
     printf("Level Green: %d!\n", 255);
     printf("Level Blue: %d!\n", 255);
+    printf("Level PA12: %d!\n", 0);
 }
 
 void PWMwidget::pwmPulseWidth(RgbColor_t rgbColor)
@@ -39,4 +45,9 @@ void PWMwidget::pwmPulseWidth(RgbColor_t rgbColor)
     pwmout_pulsewidth_us(&pwmRed, rgbColor.byRed);
     pwmout_pulsewidth_us(&pwmBlue, rgbColor.byBlue);
     pwmout_pulsewidth_us(&pwmGreen, rgbColor.byGreen);
+}
+
+void pwmPulseWidthBrighness(uint8_t byLevel)
+{
+    pwmout_pulsewidth_us(&pwmPa12, byLevel);
 }
