@@ -2649,9 +2649,9 @@ bool emberAfColorControlClusterStopMoveStepCallback(app::CommandHandler * comman
 
 void emberAfColorControlClusterServerInitCallback(EndpointId endpoint)
 {
-#ifdef EMBER_AF_PLUGIN_COLOR_CONTROL_SERVER_TEMP
-    ColorControlServer::Instance().startUpColorTempCommand(endpoint);
-#endif // EMBER_AF_PLUGIN_COLOR_CONTROL_SERVER_TEMP
+// #ifdef EMBER_AF_PLUGIN_COLOR_CONTROL_SERVER_TEMP
+//     ColorControlServer::Instance().startUpColorTempCommand(endpoint);
+// #endif // EMBER_AF_PLUGIN_COLOR_CONTROL_SERVER_TEMP
 
 #ifdef EMBER_AF_PLUGIN_COLOR_CONTROL_SERVER_HSV
     ColorControlServer::Instance().updateHueSatCommand(endpoint);
