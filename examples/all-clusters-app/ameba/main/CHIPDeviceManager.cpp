@@ -37,6 +37,8 @@
 #include <app-common/zap-generated/attributes/Accessors.h>
 #include <af-enums.h>
 
+DeviceCallbacks deviceCallback;
+
 using namespace ::chip;
 
 namespace chip {
@@ -87,7 +89,5 @@ exit:
 
 void MatterPostAttributeChangeCallback(const chip::app::ConcreteAttributePath & path, uint8_t type, uint16_t size, uint8_t * value)
 {
-    DeviceCallbacks deviceCallback;
-
     deviceCallback.PostAttributeChangeCallback(path.mEndpointId, path.mClusterId, path.mAttributeId, type, size, value);
 }
