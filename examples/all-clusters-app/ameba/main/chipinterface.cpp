@@ -22,6 +22,7 @@
 #include "DeviceCallbacks.h"
 #include "Globals.h"
 #include "LEDWidget.h"
+#include "PWMWidget.h"
 #include "chip_porting.h"
 #include <DeviceInfoProviderImpl.h>
 #include <lwip_netconf.h>
@@ -113,7 +114,9 @@ Identify gIdentify1 = {
 };
 
 #ifdef CONFIG_PLATFORM_8721D
-#define STATUS_LED_GPIO_NUM PB_5
+#define STATUS_LED_GPIO_NUM1 PA_12
+#define STATUS_LED_GPIO_NUM2 PA_13
+#define STATUS_LED_GPIO_NUM3 PA_14
 #elif defined(CONFIG_PLATFORM_8710C)
 #define STATUS_LED_GPIO_NUM PA_20
 #else
@@ -161,6 +164,7 @@ extern "C" void ChipTest(void)
     SetCommissionableDataProvider(&mFactoryDataProvider);
     SetDeviceAttestationCredentialsProvider(&mFactoryDataProvider);
     CHIPDeviceManager & deviceMgr = CHIPDeviceManager::GetInstance();
+    PWMwidget pwmWidget;
 
     err = deviceMgr.Init(&EchoCallbacks);
     if (err != CHIP_NO_ERROR)
@@ -174,7 +178,11 @@ extern "C" void ChipTest(void)
 
     chip::DeviceLayer::PlatformMgr().ScheduleWork(InitServer, 0);
 
-    statusLED1.Init(STATUS_LED_GPIO_NUM);
+    // statusLED1.Init(STATUS_LED_GPIO_NUM1);
+    // statusLED1.Init(STATUS_LED_GPIO_NUM2);
+    // statusLED1.Init(STATUS_LED_GPIO_NUM3);
+    pwmWidget.pwmInit();
+
 
 #if CONFIG_ENABLE_CHIP_SHELL
     chip::LaunchShell();
