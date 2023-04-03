@@ -19,6 +19,6 @@ class PWMwidget
     public:
         void pwmInit(void);
         void pwmPulseWidth(RgbColor_t rgbColor);
-        void pwmPulseWidthBrighness(uint8_t byLevel);
+        // void pwmPulseWidthBrighness(uint8_t byLevel);
     private:
 };
