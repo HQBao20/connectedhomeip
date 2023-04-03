@@ -26,11 +26,16 @@
 #include <stdlib.h>
 
 #include "CHIPDeviceManager.h"
+#include "DeviceCallbacks.h"
 #include <app/ConcreteAttributePath.h>
 #include <app/util/basic-types.h>
 #include <support/CHIPMem.h>
 #include <support/CodeUtils.h>
 #include <support/ErrorStr.h>
+#include <app-common/zap-generated/cluster-id.h>
+#include <app-common/zap-generated/attribute-id.h>
+#include <app-common/zap-generated/attributes/Accessors.h>
+#include <af-enums.h>
 
 using namespace ::chip;
 
@@ -82,10 +87,7 @@ exit:
 
 void MatterPostAttributeChangeCallback(const chip::app::ConcreteAttributePath & path, uint8_t type, uint16_t size, uint8_t * value)
 {
-    chip::DeviceManager::CHIPDeviceManagerCallbacks * cb =
-        chip::DeviceManager::CHIPDeviceManager::GetInstance().GetCHIPDeviceManagerCallbacks();
-    if (cb != nullptr)
-    {
-        cb->PostAttributeChangeCallback(path.mEndpointId, path.mClusterId, path.mAttributeId, type, size, value);
-    }
+    DeviceCallbacks deviceCallback;
+
+    deviceCallback.PostAttributeChangeCallback(path.mEndpointId, path.mClusterId, path.mAttributeId, type, size, value);
 }
