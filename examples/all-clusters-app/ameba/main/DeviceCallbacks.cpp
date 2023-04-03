@@ -25,6 +25,8 @@
 
 #include "DeviceCallbacks.h"
 #include "CHIPDeviceManager.h"
+#include "PWMWidget.h"
+#include "ColorWidget.h"
 #include <app-common/zap-generated/attribute-id.h>
 #include <app-common/zap-generated/cluster-id.h>
 #include <app/CommandHandler.h>
@@ -56,6 +58,12 @@ using namespace ::chip::Logging;
 uint32_t identifyTimerCount;
 constexpr uint32_t kIdentifyTimerDelayMS     = 250;
 constexpr uint32_t kInitOTARequestorDelaySec = 3;
+PWMwidget pwmWidget;
+Colorwidget colorwidget;
+HsvColor_t hsvColor;
+RgbColor_t rgbColor;
+CtColor_t ctColor;
+
 
 #if CHIP_DEVICE_CONFIG_ENABLE_OTA_REQUESTOR
 void InitOTARequestorHandler(System::Layer * systemLayer, void * appState)
@@ -91,10 +99,18 @@ void DeviceCallbacks::PostAttributeChangeCallback(EndpointId endpointId, Cluster
 {
     switch (clusterId)
     {
+    case ZCL_WINDOW_COVERING_CLUSTER_ID:
+        WindowCoveringPostAttributeChangeCallback(endpointId, attributeId, value);
+        break;
     case ZCL_ON_OFF_CLUSTER_ID:
         OnOnOffPostAttributeChangeCallback(endpointId, attributeId, value);
         break;
-
+    case ZCL_LEVEL_CONTROL_CLUSTER_ID:
+        LevelControlPostAttributeChangeCallback(endpointId, attributeId, size, value);
+        break;
+    case ZCL_COLOR_CONTROL_CLUSTER_ID:
+        ColorControlPostAttributeChangeCallback(endpointId, attributeId, value);
+        break;
     case ZCL_IDENTIFY_CLUSTER_ID:
         OnIdentifyPostAttributeChangeCallback(endpointId, attributeId, value);
         break;
@@ -149,7 +165,72 @@ void DeviceCallbacks::OnOnOffPostAttributeChangeCallback(EndpointId endpointId, 
                  ChipLogError(DeviceLayer, TAG, "Unexpected EndPoint ID: `0x%02x'", endpointId));
 
     // At this point we can assume that value points to a bool value.
-    statusLED1.Set(*value);
+    // statusLED1.Set(*value);
+
+exit:
+    return;
+}
+
+void DeviceCallbacks::LevelControlPostAttributeChangeCallback(chip::EndpointId endpointId, chip::AttributeId attributeId, uint16_t size, uint8_t * value)
+{
+    VerifyOrExit(attributeId == ZCL_CURRENT_LEVEL_ATTRIBUTE_ID,
+                 ChipLogError(DeviceLayer, TAG, "Unhandled Attribute ID: '0x%04x", attributeId));
+    VerifyOrExit(endpointId == 1 || endpointId == 2,
+                 ChipLogError(DeviceLayer, TAG, "Unexpected EndPoint ID: `0x%02x'", endpointId));
+
+    // At this point we can assume that value points to a bool value.
+    if (size == 1)
+    {
+        // ChipLogProgress(Zcl, "New level: %u ", *value);
+        hsvColor.byValue = *value;
+        printf("New level: %d\n", *value);
+    }
+    else
+    {
+        ChipLogError(Zcl, "wrong length for level: %d\n", size);
+    }
+
+exit:
+    return;
+}
+
+void DeviceCallbacks::ColorControlPostAttributeChangeCallback(chip::EndpointId endpointId, chip::AttributeId attributeId, uint8_t * value)
+{
+
+    VerifyOrExit(attributeId == ZCL_COLOR_CONTROL_CURRENT_HUE_ATTRIBUTE_ID && attributeId == ZCL_COLOR_CONTROL_CURRENT_SATURATION_ATTRIBUTE_ID,
+                 ChipLogError(DeviceLayer, TAG, "Unhandled Attribute ID: '0x%04x", attributeId));
+    VerifyOrExit(endpointId == 1 || endpointId == 2,
+                 ChipLogError(DeviceLayer, TAG, "Unexpected EndPoint ID: `0x%02x'", endpointId));
+
+    if (attributeId == ZCL_COLOR_CONTROL_CURRENT_HUE_ATTRIBUTE_ID)
+    {
+        hsvColor.byHue = *value;
+        emberAfReadServerAttribute(endpointId, ZCL_COLOR_CONTROL_CLUSTER_ID, ZCL_COLOR_CONTROL_CURRENT_HUE_ATTRIBUTE_ID,
+                                   &hsvColor.bySaturation, sizeof(uint8_t));
+    }
+    if (attributeId == ZCL_COLOR_CONTROL_CURRENT_SATURATION_ATTRIBUTE_ID)
+    {
+        hsvColor.bySaturation = *value;
+        emberAfReadServerAttribute(endpointId, ZCL_COLOR_CONTROL_CLUSTER_ID, ZCL_COLOR_CONTROL_CURRENT_SATURATION_ATTRIBUTE_ID, &hsvColor.byHue,
+                                   sizeof(uint8_t));
+    }
+    // rgbColor = colorwidget.cttToRgb(ctColor);
+    rgbColor = colorwidget.hsvToRgb(hsvColor);
+    pwmWidget.pwmPulseWidth(rgbColor);
+    printf("Hue: %d Saturation: %d\n", hsvColor.byHue, hsvColor.bySaturation);
+
+exit:
+    return;
+}
+
+void DeviceCallbacks::WindowCoveringPostAttributeChangeCallback(EndpointId endpointId, AttributeId attributeId, uint8_t * value)
+{
+    VerifyOrExit(attributeId == ZCL_WC_MODE_ATTRIBUTE_ID,
+                 ChipLogError(DeviceLayer, TAG, "Unhandled Attribute ID: '0x%04x", attributeId));
+    VerifyOrExit(endpointId == 1 || endpointId == 2,
+                 ChipLogError(DeviceLayer, TAG, "Unexpected EndPoint ID: `0x%02x'", endpointId));
+
+    printf("Endpoint: %d", endpointId);
 
 exit:
     return;
