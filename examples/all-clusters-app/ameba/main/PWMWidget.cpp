@@ -47,7 +47,7 @@ void PWMwidget::pwmPulseWidth(RgbColor_t rgbColor)
     pwmout_pulsewidth_us(&pwmGreen, rgbColor.byGreen);
 }
 
-void pwmPulseWidthBrighness(uint8_t byLevel)
-{
-    pwmout_pulsewidth_us(&pwmPa12, byLevel);
-}
+// void pwmPulseWidthBrighness(uint8_t byLevel)
+// {
+//     pwmout_pulsewidth_us(&pwmPa12, byLevel);
+// }
