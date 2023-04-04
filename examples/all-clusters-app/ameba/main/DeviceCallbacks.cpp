@@ -183,7 +183,6 @@ void DeviceCallbacks::LevelControlPostAttributeChangeCallback(chip::EndpointId e
     {
         // ChipLogProgress(Zcl, "New level: %u ", *value);
         hsvColor.byValue = *value;
-        // pwmPulseWidthBrighness(*value);
         printf("New level: %d\n", *value);
     }
     else
