@@ -22,7 +22,7 @@
  * Implements all the callbacks to the application from the CHIP Stack
  *
  **/
-
+#include <stdio.h>
 #include "DeviceCallbacks.h"
 #include "CHIPDeviceManager.h"
 #include "PWMWidget.h"
@@ -183,7 +183,6 @@ void DeviceCallbacks::LevelControlPostAttributeChangeCallback(chip::EndpointId e
     {
         // ChipLogProgress(Zcl, "New level: %u ", *value);
         hsvColor.byValue = *value;
-        pwmPulseWidthBrighness(*value);
         printf("New level: %d\n", *value);
     }
     else
