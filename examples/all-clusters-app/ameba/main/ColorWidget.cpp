@@ -58,13 +58,13 @@ WyColor_t Colorwidget::controlCCT(CtColor_t ct)
 
     if (yellowMin <= ct.wCtMireds <= yellowMax)
     {
-        wy.byYellow = ((ct.wCtMireds * PWM_PERIOD) / yellowMax) * ((uint8_t)CONVERT_LEVEL(ct.byBrighness));
-        wy.byWhite = (PWM_PERIOD - ((ct.wCtMireds * PWM_PERIOD) / yellowMax)) * ((uint8_t)CONVERT_LEVEL(ct.byBrighness));
+        wy.byYellow = (PWM_PERIOD - ((ct.wCtMireds * PWM_PERIOD) / yellowMax) * ((uint8_t)CONVERT_LEVEL(ct.byBrighness)));
+        wy.byWhite = (PWM_PERIOD - (PWM_PERIOD - ((ct.wCtMireds * PWM_PERIOD) / yellowMax)) * ((uint8_t)CONVERT_LEVEL(ct.byBrighness)));
     }
     else if (whiteMin <= ct.wCtMireds <= whiteMax)
     {
-        wy.byYellow = (PWM_PERIOD - ((ct.wCtMireds * PWM_PERIOD) / whiteMax)) * ((uint8_t)CONVERT_LEVEL(ct.byBrighness));
-        wy.byWhite = ((ct.wCtMireds * PWM_PERIOD) / whiteMax) * ((uint8_t)CONVERT_LEVEL(ct.byBrighness));
+        wy.byYellow = (PWM_PERIOD - (PWM_PERIOD - ((ct.wCtMireds * PWM_PERIOD) / whiteMax)) * ((uint8_t)CONVERT_LEVEL(ct.byBrighness)));
+        wy.byWhite = (PWM_PERIOD - ((ct.wCtMireds * PWM_PERIOD) / whiteMax) * ((uint8_t)CONVERT_LEVEL(ct.byBrighness)));
     }
 
     return wy;
