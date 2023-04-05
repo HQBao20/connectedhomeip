@@ -2,6 +2,8 @@
 #include "LEDWidget.h"
 #include "ColorWidget.h"
 
+#define PWM_PERIOD 255
+
 struct pwmout_s {
     uint8_t pwm_idx;
     uint32_t period;//in us
@@ -19,6 +21,5 @@ class PWMwidget
     public:
         void pwmInit(void);
         void pwmPulseWidth(RgbColor_t rgbColor);
-        // void pwmPulseWidthBrighness(uint8_t byLevel);
     private:
 };

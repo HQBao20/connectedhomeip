@@ -10,6 +10,12 @@ typedef struct
 
 typedef struct
 {
+    uint8_t byWhite;
+    uint8_t byYellow;
+}WyColor_t;
+
+typedef struct
+{
     uint8_t byHue;
     uint8_t bySaturation;
     uint8_t byValue;
@@ -17,12 +23,23 @@ typedef struct
 
 typedef struct
 {
-    uint16_t dwCtMireds;
+    uint16_t wCtMireds;
+    uint8_t byBrighness;
 }CtColor_t;
+
+enum ColorTemperature
+{
+    yellowMax = 500;
+    yellowMedium = 370;
+    yellowMin = 333;
+    whiteMax = 250;
+    whiteMedium = 200;
+    whiteMin = 167;
+};
 
 class Colorwidget
 {
     public:
         RgbColor_t hsvToRgb(HsvColor_t hsv);
-        RgbColor_t cttToRgb(CtColor_t ct);
+        WyColor_t controlCCT(CtColor_t ct);
 };

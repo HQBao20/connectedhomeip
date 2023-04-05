@@ -1,8 +1,9 @@
 #include <cstdio>
 #include <math.h>
+#include "PWMWidget.h"
 #include "ColorWidget.h"
 
-#define clamp(a, min, max) ((a) < (min) ? (min) : ((a) > (max) ? (max) : (a)))
+#define CONVERT_LEVEL(x) ((254 - x) / 254)
 
 RgbColor_t Colorwidget::hsvToRgb(HsvColor_t hsv)
 {
@@ -51,55 +52,20 @@ RgbColor_t Colorwidget::hsvToRgb(HsvColor_t hsv)
     return rgb;
 }
 
-RgbColor_t Colorwidget::cttToRgb(CtColor_t ct)
+WyColor_t Colorwidget::controlCCT(CtColor_t ct)
 {
-    RgbColor_t rgb;
-    float fRed, fGreen, fBlue;
+    WyColor_t wy;
 
-    // Algorithm credits to Tanner Helland: https://tannerhelland.com/2012/09/18/convert-temperature-rgb-algorithm-code.html
-
-    // Convert Mireds to centiKelvins. k = 1,000,000/mired
-    float fCtCentiKelvin = 10000 / ct.dwCtMireds;
-
-    // Red
-    if (fCtCentiKelvin <= 66)
+    if (yellowMin <= ct.wCtMireds <= yellowMax)
     {
-        fRed = 255;
+        wy.byYellow = ((ct.wCtMireds * PWM_PERIOD) / yellowMax) * ((uint8_t)CONVERT_LEVEL(ct.byBrighness));
+        wy.byWhite = (PWM_PERIOD - ((ct.wCtMireds * PWM_PERIOD) / yellowMax)) * ((uint8_t)CONVERT_LEVEL(ct.byBrighness));
     }
-    else
+    else if (whiteMin <= ct.wCtMireds <= whiteMax)
     {
-        fRed = 329.698727446f * pow(fCtCentiKelvin - 60, -0.1332047592f);
+        wy.byYellow = (PWM_PERIOD - ((ct.wCtMireds * PWM_PERIOD) / whiteMax)) * ((uint8_t)CONVERT_LEVEL(ct.byBrighness));
+        wy.byWhite = ((ct.wCtMireds * PWM_PERIOD) / whiteMax) * ((uint8_t)CONVERT_LEVEL(ct.byBrighness));
     }
 
-    // Green
-    if (fCtCentiKelvin <= 66)
-    {
-        fGreen = 99.4708025861f * log(fCtCentiKelvin) - 161.1195681661f;
-    }
-    else
-    {
-        fGreen = 288.1221695283f * pow(fCtCentiKelvin - 60, -0.0755148492f);
-    }
-
-    // Blue
-    if (fCtCentiKelvin >= 66)
-    {
-        fBlue = 255;
-    }
-    else
-    {
-        if (fCtCentiKelvin <= 19)
-        {
-            fBlue = 0;
-        }
-        else
-        {
-            fBlue = 138.5177312231 * log(fCtCentiKelvin - 10) - 305.0447927307;
-        }
-    }
-    rgb.byRed = (uint8_t) clamp(fRed, 0, 255);
-    rgb.byGreen = (uint8_t) clamp(fGreen, 0, 255);
-    rgb.byBlue = (uint8_t) clamp(fBlue, 0, 255);
-
-    return rgb;
+    return wy;
 }
