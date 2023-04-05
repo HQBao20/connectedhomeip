@@ -20,6 +20,6 @@ class PWMwidget
 {
     public:
         void pwmInit(void);
-        void pwmPulseWidth(RgbColor_t rgbColor);
+        void pwmPulseWidth(WyColor_t wyColor);
     private:
 };

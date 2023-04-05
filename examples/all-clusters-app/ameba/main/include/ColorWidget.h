@@ -24,17 +24,17 @@ typedef struct
 typedef struct
 {
     uint16_t wCtMireds;
-    uint8_t byBrighness;
+    float fBrighness;
 }CtColor_t;
 
 enum ColorTemperature
 {
-    yellowMax = 500;
-    yellowMedium = 370;
-    yellowMin = 333;
-    whiteMax = 250;
-    whiteMedium = 200;
-    whiteMin = 167;
+    yellowMax = 500,
+    yellowMedium = 370,
+    yellowMin = 333,
+    whiteMax = 250,
+    whiteMedium = 200
+    whiteMin = 167
 };
 
 class Colorwidget

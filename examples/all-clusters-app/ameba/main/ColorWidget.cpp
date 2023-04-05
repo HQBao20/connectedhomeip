@@ -3,7 +3,7 @@
 #include "PWMWidget.h"
 #include "ColorWidget.h"
 
-#define CONVERT_LEVEL(x) ((254 - x) / 254)
+#define LEVEL_MAX 254
 
 RgbColor_t Colorwidget::hsvToRgb(HsvColor_t hsv)
 {
@@ -56,16 +56,20 @@ WyColor_t Colorwidget::controlCCT(CtColor_t ct)
 {
     WyColor_t wy;
 
-    if (yellowMin <= ct.wCtMireds <= yellowMax)
+    if (ct.wCtMireds >= yellowMin && ct.wCtMireds <= yellowMax)
     {
-        wy.byYellow = ((ct.wCtMireds * PWM_PERIOD) / yellowMax) * ((uint8_t)CONVERT_LEVEL(ct.byBrighness));
-        wy.byWhite = (PWM_PERIOD - ((ct.wCtMireds * PWM_PERIOD) / yellowMax)) * ((uint8_t)CONVERT_LEVEL(ct.byBrighness));
+        wy.byYellow = (PWM_PERIOD - ((ct.wCtMireds * PWM_PERIOD) / yellowMax) * (ct.fBrighness / LEVEL_MAX));
+        wy.byWhite = (PWM_PERIOD - (PWM_PERIOD - ((ct.wCtMireds * PWM_PERIOD) / yellowMax)) * (ct.fBrighness / LEVEL_MAX));
     }
-    else if (whiteMin <= ct.wCtMireds <= whiteMax)
+    else if (ct.wCtMireds >= whiteMin && ct.wCtMireds <= whiteMax)
     {
-        wy.byYellow = (PWM_PERIOD - ((ct.wCtMireds * PWM_PERIOD) / whiteMax)) * ((uint8_t)CONVERT_LEVEL(ct.byBrighness));
-        wy.byWhite = ((ct.wCtMireds * PWM_PERIOD) / whiteMax) * ((uint8_t)CONVERT_LEVEL(ct.byBrighness));
+        wy.byYellow = (PWM_PERIOD - (PWM_PERIOD - ((ct.wCtMireds * PWM_PERIOD) / whiteMax)) * (ct.fBrighness / LEVEL_MAX));
+        wy.byWhite = (PWM_PERIOD - ((ct.wCtMireds * PWM_PERIOD) / whiteMax) * (ct.fBrighness / LEVEL_MAX));
     }
+
+    printf("Brighness: %.3f\n", (ct.fBrighness / LEVEL_MAX));
+    printf("Yellow: %d\n", wy.byYellow);
+    printf("White: %d\n", wy.byWhite);
 
     return wy;
 }

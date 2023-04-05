@@ -183,7 +183,7 @@ void DeviceCallbacks::LevelControlPostAttributeChangeCallback(chip::EndpointId e
     if (size == 1)
     {
         // ChipLogProgress(Zcl, "New level: %u ", *value);
-        ctColor.byBrighness = *value;
+        ctColor.fBrighness = (float)*value;
         printf("New level: %d\n", *value);
     }
     else
@@ -219,13 +219,21 @@ void DeviceCallbacks::ColorControlPostAttributeChangeCallback(chip::EndpointId e
     // }
     if (attributeId == ZCL_COLOR_CONTROL_COLOR_TEMPERATURE_ATTRIBUTE_ID)
     {
-        ctColor.wCtMireds = *value;
+        if (*value < 256)
+        {
+            ctColor.wCtMireds = *value + 256;
+        }
+        else
+        {
+            ctColor.wCtMireds = *value;
+        }
     }
     // rgbColor = colorwidget.cttToRgb(ctColor);
     // rgbColor = colorwidget.hsvToRgb(hsvColor);
     wyColor = colorwidget.controlCCT(ctColor);
     pwmWidget.pwmPulseWidth(wyColor);
-    printf("White: %d Yellow: %d\n", wyColor.byWhite, wyColor.byBrighness);
+    printf("White: %d Yellow: %d\n", wyColor.byWhite, wyColor.byYellow);
+    printf("CCT: %d\n", ctColor.wCtMireds);
 
 exit:
     return;
