@@ -63,6 +63,7 @@ Colorwidget colorwidget;
 HsvColor_t hsvColor;
 RgbColor_t rgbColor;
 CtColor_t ctColor;
+WyColor_t wyColor;
 
 
 #if CHIP_DEVICE_CONFIG_ENABLE_OTA_REQUESTOR
@@ -182,7 +183,7 @@ void DeviceCallbacks::LevelControlPostAttributeChangeCallback(chip::EndpointId e
     if (size == 1)
     {
         // ChipLogProgress(Zcl, "New level: %u ", *value);
-        hsvColor.byValue = *value;
+        ctColor.byBrighness = *value;
         printf("New level: %d\n", *value);
     }
     else
@@ -197,34 +198,40 @@ exit:
 void DeviceCallbacks::ColorControlPostAttributeChangeCallback(chip::EndpointId endpointId, chip::AttributeId attributeId, uint8_t * value)
 {
 
-    VerifyOrExit(attributeId == ZCL_COLOR_CONTROL_CURRENT_HUE_ATTRIBUTE_ID && attributeId == ZCL_COLOR_CONTROL_CURRENT_SATURATION_ATTRIBUTE_ID,
+    // VerifyOrExit(attributeId == ZCL_COLOR_CONTROL_CURRENT_HUE_ATTRIBUTE_ID && attributeId == ZCL_COLOR_CONTROL_CURRENT_SATURATION_ATTRIBUTE_ID,
+    //              ChipLogError(DeviceLayer, TAG, "Unhandled Attribute ID: '0x%04x", attributeId));
+    VerifyOrExit(attributeId == ZCL_COLOR_CONTROL_COLOR_TEMPERATURE_ATTRIBUTE_ID,
                  ChipLogError(DeviceLayer, TAG, "Unhandled Attribute ID: '0x%04x", attributeId));
     // VerifyOrExit(attributeId == ZCL_COLOR_CONTROL_COLOR_TEMPERATURE_ATTRIBUTE_ID,
     //              ChipLogError(DeviceLayer, TAG, "Unhandled Attribute ID: '0x%04x", attributeId));
     VerifyOrExit(endpointId == 1 || endpointId == 2,
                  ChipLogError(DeviceLayer, TAG, "Unexpected EndPoint ID: `0x%02x'", endpointId));
 
-    if (attributeId == ZCL_COLOR_CONTROL_CURRENT_HUE_ATTRIBUTE_ID)
+    // if (attributeId == ZCL_COLOR_CONTROL_CURRENT_HUE_ATTRIBUTE_ID)
+    // {
+    //     hsvColor.byHue = *value;
+    //     emberAfReadServerAttribute(endpointId, ZCL_COLOR_CONTROL_CLUSTER_ID, ZCL_COLOR_CONTROL_CURRENT_HUE_ATTRIBUTE_ID,
+    //                                &hsvColor.bySaturation, sizeof(uint8_t));
+    // }
+    // if (attributeId == ZCL_COLOR_CONTROL_CURRENT_SATURATION_ATTRIBUTE_ID)
+    // {
+    //     hsvColor.bySaturation = *value;
+    //     emberAfReadServerAttribute(endpointId, ZCL_COLOR_CONTROL_CLUSTER_ID, ZCL_COLOR_CONTROL_CURRENT_SATURATION_ATTRIBUTE_ID, &hsvColor.byHue,
+    //                                sizeof(uint8_t));
+    // }
+    if (attributeId == ZCL_COLOR_CONTROL_COLOR_TEMPERATURE_ATTRIBUTE_ID)
     {
-        hsvColor.byHue = *value;
-        // emberAfReadServerAttribute(endpointId, ZCL_COLOR_CONTROL_CLUSTER_ID, ZCL_COLOR_CONTROL_CURRENT_HUE_ATTRIBUTE_ID,
-        //                            &hsvColor.bySaturation, sizeof(uint8_t));
-    }
-    if (attributeId == ZCL_COLOR_CONTROL_CURRENT_SATURATION_ATTRIBUTE_ID)
-    {
-        hsvColor.bySaturation = *value;
-        // emberAfReadServerAttribute(endpointId, ZCL_COLOR_CONTROL_CLUSTER_ID, ZCL_COLOR_CONTROL_CURRENT_SATURATION_ATTRIBUTE_ID, &hsvColor.byHue,
-        //                            sizeof(uint8_t));
+        ctColor.wCtMireds = *value;
     }
     // if (attributeId == ZCL_COLOR_CONTROL_COLOR_TEMPERATURE_ATTRIBUTE_ID)
     // {
     //     ctColor.dwCtMireds = *value;
     // }
     // rgbColor = colorwidget.cttToRgb(ctColor);
-    rgbColor = colorwidget.hsvToRgb(hsvColor);
-    pwmWidget.pwmPulseWidth(rgbColor);
-    // printf("Color Temperature %d\n", ctColor.dwCtMireds);
-    printf("Hue %d Saturation %d\n", hsvColor.byHue, hsvColor.bySaturation);
+    // rgbColor = colorwidget.hsvToRgb(hsvColor);
+    wyColor = colorwidget.controlCCT(ctColor);
+    pwmWidget.pwmPulseWidth(wyColor);
+    printf("White: %d Yellow: %d\n", wyColor.byWhite, wyColor.byBrighness);
 
 exit:
     return;
