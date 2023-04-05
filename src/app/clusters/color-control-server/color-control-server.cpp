@@ -2142,10 +2142,13 @@ void ColorControlServer::startUpColorTempCommand(EndpointId endpoint)
 
                     updateColorMode = EMBER_ZCL_ENHANCED_COLOR_MODE_COLOR_TEMPERATURE;
                     Attributes::EnhancedColorMode::Set(endpoint, updateColorMode);
+                    emberAfColorControlClusterPrintln("Color Mode: %d\n", updateColorMode);
                 }
             }
         }
     }
+
+    emberAfPluginColorControlServerHueSatTransitionEventHandler(endpoint);
 }
 
 /**

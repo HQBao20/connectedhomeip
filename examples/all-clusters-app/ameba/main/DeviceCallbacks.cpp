@@ -22,7 +22,7 @@
  * Implements all the callbacks to the application from the CHIP Stack
  *
  **/
-
+#include <stdio.h>
 #include "DeviceCallbacks.h"
 #include "CHIPDeviceManager.h"
 #include "PWMWidget.h"
@@ -202,6 +202,8 @@ void DeviceCallbacks::ColorControlPostAttributeChangeCallback(chip::EndpointId e
     //              ChipLogError(DeviceLayer, TAG, "Unhandled Attribute ID: '0x%04x", attributeId));
     VerifyOrExit(attributeId == ZCL_COLOR_CONTROL_COLOR_TEMPERATURE_ATTRIBUTE_ID,
                  ChipLogError(DeviceLayer, TAG, "Unhandled Attribute ID: '0x%04x", attributeId));
+    // VerifyOrExit(attributeId == ZCL_COLOR_CONTROL_COLOR_TEMPERATURE_ATTRIBUTE_ID,
+    //              ChipLogError(DeviceLayer, TAG, "Unhandled Attribute ID: '0x%04x", attributeId));
     VerifyOrExit(endpointId == 1 || endpointId == 2,
                  ChipLogError(DeviceLayer, TAG, "Unexpected EndPoint ID: `0x%02x'", endpointId));
 
@@ -228,6 +230,10 @@ void DeviceCallbacks::ColorControlPostAttributeChangeCallback(chip::EndpointId e
             ctColor.wCtMireds = *value;
         }
     }
+    // if (attributeId == ZCL_COLOR_CONTROL_COLOR_TEMPERATURE_ATTRIBUTE_ID)
+    // {
+    //     ctColor.dwCtMireds = *value;
+    // }
     // rgbColor = colorwidget.cttToRgb(ctColor);
     // rgbColor = colorwidget.hsvToRgb(hsvColor);
     wyColor = colorwidget.controlCCT(ctColor);
