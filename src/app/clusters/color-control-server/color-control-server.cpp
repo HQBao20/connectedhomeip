@@ -2107,6 +2107,7 @@ void ColorControlServer::startUpColorTempCommand(EndpointId endpoint)
     // null                 Set the ColorTemperatureMireds attribute to its previous value.
 
     // Initialize startUpColorTempMireds to "maintain previous value" value null
+    emberAfColorControlClusterPrintln("Da vao duoc day!\n");
     app::DataModel::Nullable<uint16_t> startUpColorTemp;
     EmberAfStatus status = Attributes::StartUpColorTemperatureMireds::Get(endpoint, startUpColorTemp);
 
@@ -2136,14 +2137,18 @@ void ColorControlServer::startUpColorTempCommand(EndpointId endpoint)
                 {
                     // Set ColorMode attributes to reflect ColorTemperature.
                     uint8_t updateColorMode = EMBER_ZCL_COLOR_MODE_COLOR_TEMPERATURE;
+                    emberAfColorControlClusterPrintln("Color Mode: %d\n", updateColorMode);
                     Attributes::ColorMode::Set(endpoint, updateColorMode);
 
                     updateColorMode = EMBER_ZCL_ENHANCED_COLOR_MODE_COLOR_TEMPERATURE;
                     Attributes::EnhancedColorMode::Set(endpoint, updateColorMode);
+                    emberAfColorControlClusterPrintln("Color Mode: %d\n", updateColorMode);
                 }
             }
         }
     }
+
+    emberAfPluginColorControlServerHueSatTransitionEventHandler(endpoint);
 }
 
 /**
