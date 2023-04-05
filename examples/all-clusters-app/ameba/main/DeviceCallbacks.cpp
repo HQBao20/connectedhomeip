@@ -199,25 +199,32 @@ void DeviceCallbacks::ColorControlPostAttributeChangeCallback(chip::EndpointId e
 
     VerifyOrExit(attributeId == ZCL_COLOR_CONTROL_CURRENT_HUE_ATTRIBUTE_ID && attributeId == ZCL_COLOR_CONTROL_CURRENT_SATURATION_ATTRIBUTE_ID,
                  ChipLogError(DeviceLayer, TAG, "Unhandled Attribute ID: '0x%04x", attributeId));
+    // VerifyOrExit(attributeId == ZCL_COLOR_CONTROL_COLOR_TEMPERATURE_ATTRIBUTE_ID,
+    //              ChipLogError(DeviceLayer, TAG, "Unhandled Attribute ID: '0x%04x", attributeId));
     VerifyOrExit(endpointId == 1 || endpointId == 2,
                  ChipLogError(DeviceLayer, TAG, "Unexpected EndPoint ID: `0x%02x'", endpointId));
 
     if (attributeId == ZCL_COLOR_CONTROL_CURRENT_HUE_ATTRIBUTE_ID)
     {
         hsvColor.byHue = *value;
-        emberAfReadServerAttribute(endpointId, ZCL_COLOR_CONTROL_CLUSTER_ID, ZCL_COLOR_CONTROL_CURRENT_HUE_ATTRIBUTE_ID,
-                                   &hsvColor.bySaturation, sizeof(uint8_t));
+        // emberAfReadServerAttribute(endpointId, ZCL_COLOR_CONTROL_CLUSTER_ID, ZCL_COLOR_CONTROL_CURRENT_HUE_ATTRIBUTE_ID,
+        //                            &hsvColor.bySaturation, sizeof(uint8_t));
     }
     if (attributeId == ZCL_COLOR_CONTROL_CURRENT_SATURATION_ATTRIBUTE_ID)
     {
         hsvColor.bySaturation = *value;
-        emberAfReadServerAttribute(endpointId, ZCL_COLOR_CONTROL_CLUSTER_ID, ZCL_COLOR_CONTROL_CURRENT_SATURATION_ATTRIBUTE_ID, &hsvColor.byHue,
-                                   sizeof(uint8_t));
+        // emberAfReadServerAttribute(endpointId, ZCL_COLOR_CONTROL_CLUSTER_ID, ZCL_COLOR_CONTROL_CURRENT_SATURATION_ATTRIBUTE_ID, &hsvColor.byHue,
+        //                            sizeof(uint8_t));
     }
+    // if (attributeId == ZCL_COLOR_CONTROL_COLOR_TEMPERATURE_ATTRIBUTE_ID)
+    // {
+    //     ctColor.dwCtMireds = *value;
+    // }
     // rgbColor = colorwidget.cttToRgb(ctColor);
     rgbColor = colorwidget.hsvToRgb(hsvColor);
     pwmWidget.pwmPulseWidth(rgbColor);
-    printf("Hue: %d Saturation: %d\n", hsvColor.byHue, hsvColor.bySaturation);
+    // printf("Color Temperature %d\n", ctColor.dwCtMireds);
+    printf("Hue %d Saturation %d\n", hsvColor.byHue, hsvColor.bySaturation);
 
 exit:
     return;
