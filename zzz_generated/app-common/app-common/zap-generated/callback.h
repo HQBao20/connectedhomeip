@@ -9193,4 +9193,4 @@ chip::Protocols::InteractionModel::Status MatterPreAttributeChangeCallback(const
  * the attribute was set by the framework.
  */
 void MatterPostAttributeChangeCallback(const chip::app::ConcreteAttributePath & attributePath, uint8_t type, uint16_t size,
-                                       uint8_t * value);
+                                       uint16_t * value);
