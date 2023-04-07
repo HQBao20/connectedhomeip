@@ -96,7 +96,7 @@ void DeviceCallbacks::DeviceEventCallback(const ChipDeviceEvent * event, intptr_
 }
 
 void DeviceCallbacks::PostAttributeChangeCallback(EndpointId endpointId, ClusterId clusterId, AttributeId attributeId, uint8_t type,
-                                                  uint16_t size, uint8_t * value)
+                                                  uint16_t size, uint16_t * value)
 {
     switch (clusterId)
     {
@@ -158,7 +158,7 @@ void DeviceCallbacks::OnInternetConnectivityChange(const ChipDeviceEvent * event
     }
 }
 
-void DeviceCallbacks::OnOnOffPostAttributeChangeCallback(EndpointId endpointId, AttributeId attributeId, uint8_t * value)
+void DeviceCallbacks::OnOnOffPostAttributeChangeCallback(EndpointId endpointId, AttributeId attributeId, uint16_t * value)
 {
     VerifyOrExit(attributeId == ZCL_ON_OFF_ATTRIBUTE_ID,
                  ChipLogError(DeviceLayer, TAG, "Unhandled Attribute ID: '0x%04x", attributeId));
@@ -172,7 +172,7 @@ exit:
     return;
 }
 
-void DeviceCallbacks::LevelControlPostAttributeChangeCallback(chip::EndpointId endpointId, chip::AttributeId attributeId, uint16_t size, uint8_t * value)
+void DeviceCallbacks::LevelControlPostAttributeChangeCallback(chip::EndpointId endpointId, chip::AttributeId attributeId, uint16_t size, uint16_t * value)
 {
     VerifyOrExit(attributeId == ZCL_CURRENT_LEVEL_ATTRIBUTE_ID,
                  ChipLogError(DeviceLayer, TAG, "Unhandled Attribute ID: '0x%04x", attributeId));
@@ -195,7 +195,7 @@ exit:
     return;
 }
 
-void DeviceCallbacks::ColorControlPostAttributeChangeCallback(chip::EndpointId endpointId, chip::AttributeId attributeId, uint8_t * value)
+void DeviceCallbacks::ColorControlPostAttributeChangeCallback(chip::EndpointId endpointId, chip::AttributeId attributeId, uint16_t * value)
 {
 
     // VerifyOrExit(attributeId == ZCL_COLOR_CONTROL_CURRENT_HUE_ATTRIBUTE_ID && attributeId == ZCL_COLOR_CONTROL_CURRENT_SATURATION_ATTRIBUTE_ID,
@@ -245,7 +245,7 @@ exit:
     return;
 }
 
-void DeviceCallbacks::WindowCoveringPostAttributeChangeCallback(EndpointId endpointId, AttributeId attributeId, uint8_t * value)
+void DeviceCallbacks::WindowCoveringPostAttributeChangeCallback(EndpointId endpointId, AttributeId attributeId, uint16_t * value)
 {
     VerifyOrExit(attributeId == ZCL_WC_MODE_ATTRIBUTE_ID,
                  ChipLogError(DeviceLayer, TAG, "Unhandled Attribute ID: '0x%04x", attributeId));
@@ -266,7 +266,7 @@ void IdentifyTimerHandler(Layer * systemLayer, void * appState, CHIP_ERROR error
     }
 }
 
-void DeviceCallbacks::OnIdentifyPostAttributeChangeCallback(EndpointId endpointId, AttributeId attributeId, uint8_t * value)
+void DeviceCallbacks::OnIdentifyPostAttributeChangeCallback(EndpointId endpointId, AttributeId attributeId, uint16_t * value)
 {
     VerifyOrExit(attributeId == ZCL_IDENTIFY_TIME_ATTRIBUTE_ID,
                  ChipLogError(DeviceLayer, "[%s] Unhandled Attribute ID: '0x%04x", TAG, attributeId));
