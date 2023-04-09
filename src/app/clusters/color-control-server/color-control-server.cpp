@@ -2147,8 +2147,6 @@ void ColorControlServer::startUpColorTempCommand(EndpointId endpoint)
             }
         }
     }
-
-    emberAfPluginColorControlServerHueSatTransitionEventHandler(endpoint);
 }
 
 /**
