@@ -55,18 +55,45 @@ RgbColor_t Colorwidget::hsvToRgb(HsvColor_t hsv)
 WyColor_t Colorwidget::controlCCT(CtColor_t ct)
 {
     WyColor_t wy;
+    uint8_t byTemperature = ct.wCtMireds;
 
-    if (ct.wCtMireds >= yellowMin && ct.wCtMireds <= yellowMax)
+    switch (byTemperature)
     {
-        wy.byYellow = (PWM_PERIOD - ((ct.wCtMireds * PWM_PERIOD) / yellowMax) * (ct.byBrighness / LEVEL_MAX));
-        wy.byWhite = (PWM_PERIOD - (PWM_PERIOD - ((ct.wCtMireds * PWM_PERIOD) / yellowMax)) * (ct.byBrighness / LEVEL_MAX));
-    }
-    else if (ct.wCtMireds >= whiteMin && ct.wCtMireds <= whiteMax)
-    {
-        wy.byYellow = (PWM_PERIOD - (PWM_PERIOD - ((ct.wCtMireds * PWM_PERIOD) / whiteMax)) * (ct.byBrighness / LEVEL_MAX));
-        wy.byWhite = (PWM_PERIOD - ((ct.wCtMireds * PWM_PERIOD) / whiteMax) * (ct.byBrighness / LEVEL_MAX));
+        case yellowMax:
+        {
+            wy.byYellow = PWM_PERIOD - ((((ct.wCtMireds + 256) * PWM_PERIOD) / (yellowMax + 256)) * (ct.fBrighness / LEVEL_MAX));
+            wy.byWhite = 255;
+        }break;
+        case yellowMedium:
+        {
+            wy.byYellow = PWM_PERIOD - ((((ct.wCtMireds + 256) * PWM_PERIOD) / (yellowMax + 256)) * (ct.fBrighness / LEVEL_MAX));
+            wy.byWhite = PWM_PERIOD - (wy.byYellow * (ct.fBrighness / LEVEL_MAX));
+        }break;
+        case yellowMin:
+        {
+            wy.byYellow = PWM_PERIOD - ((((ct.wCtMireds + 256) * PWM_PERIOD) / (yellowMax + 256)) * (ct.fBrighness / LEVEL_MAX));
+            wy.byWhite = PWM_PERIOD - (wy.byYellow * (ct.fBrighness / LEVEL_MAX));
+        }break;
+        case whiteMax:
+        {
+            wy.byWhite = PWM_PERIOD - (((ct.wCtMireds * PWM_PERIOD) / whiteMax) * (ct.fBrighness / LEVEL_MAX));
+            wy.byYellow = 255;
+        }break;
+        case whiteMedium:
+        {
+            wy.byWhite = PWM_PERIOD - (((ct.wCtMireds * PWM_PERIOD) / whiteMax) * (ct.fBrighness / LEVEL_MAX));
+            wy.byYellow = PWM_PERIOD - (wy.byWhite * (ct.fBrighness / LEVEL_MAX));
+        }break;
+        case whiteMin:
+        {
+            wy.byWhite = PWM_PERIOD - (((ct.wCtMireds * PWM_PERIOD) / whiteMax) * (ct.fBrighness / LEVEL_MAX));
+            wy.byYellow = PWM_PERIOD - (wy.byWhite * (ct.fBrighness / LEVEL_MAX));
+        }break;
+        default:
+            break;
     }
 
+    printf("=================\n");
     printf("Brighness: %.3f\n", (ct.fBrighness / LEVEL_MAX));
     printf("Yellow: %d\n", wy.byYellow);
     printf("White: %d\n", wy.byWhite);

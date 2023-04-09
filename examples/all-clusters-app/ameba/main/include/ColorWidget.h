@@ -29,11 +29,11 @@ typedef struct
 
 enum ColorTemperature
 {
-    yellowMax = 500,
-    yellowMedium = 370,
-    yellowMin = 333,
+    yellowMax = 244,
+    yellowMedium = 114,
+    yellowMin = 77,
     whiteMax = 250,
-    whiteMedium = 200
+    whiteMedium = 200,
     whiteMin = 167
 };
 
