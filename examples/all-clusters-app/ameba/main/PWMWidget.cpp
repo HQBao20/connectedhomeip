@@ -18,31 +18,39 @@ pwmout_t pwmYellow;
 void PWMwidget::pwmInit(void)
 {
     printf("PWM widget init!\n");
-    // pwmout_init(&pwmRed, PWM1);
-    // pwmout_init(&pwmBlue, PWM2);
-    // pwmout_init(&pwmGreen, PWM3);
-    pwmout_init(&pwmWhite, PWM1);
-    pwmout_init(&pwmYellow, PWM2);
-    // pwmout_period_us(&pwmRed, PWM_PERIOD);
-    // pwmout_period_us(&pwmBlue, PWM_PERIOD);
-    // pwmout_period_us(&pwmGreen, PWM_PERIOD);
+    pwmout_init(&pwmRed, PWM1);
+    pwmout_init(&pwmBlue, PWM2);
+    pwmout_init(&pwmGreen, PWM3);
+    pwmout_init(&pwmWhite, PWM4);
+    pwmout_init(&pwmYellow, PWM5);
+    pwmout_period_us(&pwmRed, PWM_PERIOD);
+    pwmout_period_us(&pwmBlue, PWM_PERIOD);
+    pwmout_period_us(&pwmGreen, PWM_PERIOD);
     pwmout_period_us(&pwmWhite, PWM_PERIOD);
     pwmout_period_us(&pwmYellow, PWM_PERIOD);
-    // pwmout_pulsewidth_us(&pwmRed,0);
-    // pwmout_pulsewidth_us(&pwmBlue,255);
-    // pwmout_pulsewidth_us(&pwmGreen,255);
+    pwmout_pulsewidth_us(&pwmRed,0);
+    pwmout_pulsewidth_us(&pwmBlue,0);
+    pwmout_pulsewidth_us(&pwmGreen,255);
     pwmout_pulsewidth_us(&pwmWhite, 50);
     pwmout_pulsewidth_us(&pwmYellow, 180);
-
-    printf("Pulse White: %d!\n", 50);
-    printf("Pulse Yellow: %d!\n", 180);
 }
 
-void PWMwidget::pwmPulseWidth(WyColor_t wyColor)
+void PWMwidget::pwmPulseWidthCct(WyColor_t wyColor)
 {
     printf("White: %d\n", wyColor.byWhite);
     printf("Yellow: %d\n", wyColor.byYellow);
 
     pwmout_pulsewidth_us(&pwmWhite, wyColor.byWhite);
     pwmout_pulsewidth_us(&pwmYellow, wyColor.byYellow);
+}
+
+void PWMwidget::pwmPulseWidthRgb(RgbColor_t rgbColor)
+{
+    printf("Red: %d\n", rgbColor.byRed);
+    printf("Green: %d\n", rgbColor.byGreen);
+    printf("Blue: %d\n", rgbColor.byBlue);
+
+    pwmout_pulsewidth_us(&pwmRed, rgbColor.byRed);
+    pwmout_pulsewidth_us(&pwmGreen, rgbColor.byGreen);
+    pwmout_pulsewidth_us(&pwmBlue, rgbColor.byBlue);
 }

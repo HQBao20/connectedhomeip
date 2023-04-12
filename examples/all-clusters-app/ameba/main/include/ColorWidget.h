@@ -16,8 +16,8 @@ typedef struct
 
 typedef struct
 {
-    uint8_t byHue;
-    uint8_t bySaturation;
+    float fHue;
+    float fSaturation;
     uint8_t byValue;
 }HsvColor_t;
 

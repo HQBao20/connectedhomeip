@@ -54,6 +54,8 @@ using namespace ::chip::System;
 using namespace ::chip::DeviceLayer;
 using namespace ::chip::DeviceManager;
 using namespace ::chip::Logging;
+using namespace chip::app::Clusters;
+using namespace chip::app::Clusters::ColorControl;
 
 uint32_t identifyTimerCount;
 constexpr uint32_t kIdentifyTimerDelayMS     = 250;
@@ -96,7 +98,7 @@ void DeviceCallbacks::DeviceEventCallback(const ChipDeviceEvent * event, intptr_
 }
 
 void DeviceCallbacks::PostAttributeChangeCallback(EndpointId endpointId, ClusterId clusterId, AttributeId attributeId, uint8_t type,
-                                                  uint16_t size, uint16_t * value)
+                                                  uint16_t size, uint8_t * value)
 {
     switch (clusterId)
     {
@@ -158,7 +160,7 @@ void DeviceCallbacks::OnInternetConnectivityChange(const ChipDeviceEvent * event
     }
 }
 
-void DeviceCallbacks::OnOnOffPostAttributeChangeCallback(EndpointId endpointId, AttributeId attributeId, uint16_t * value)
+void DeviceCallbacks::OnOnOffPostAttributeChangeCallback(EndpointId endpointId, AttributeId attributeId, uint8_t * value)
 {
     VerifyOrExit(attributeId == ZCL_ON_OFF_ATTRIBUTE_ID,
                  ChipLogError(DeviceLayer, TAG, "Unhandled Attribute ID: '0x%04x", attributeId));
@@ -172,7 +174,7 @@ exit:
     return;
 }
 
-void DeviceCallbacks::LevelControlPostAttributeChangeCallback(chip::EndpointId endpointId, chip::AttributeId attributeId, uint16_t size, uint16_t * value)
+void DeviceCallbacks::LevelControlPostAttributeChangeCallback(chip::EndpointId endpointId, chip::AttributeId attributeId, uint16_t size, uint8_t * value)
 {
     VerifyOrExit(attributeId == ZCL_CURRENT_LEVEL_ATTRIBUTE_ID,
                  ChipLogError(DeviceLayer, TAG, "Unhandled Attribute ID: '0x%04x", attributeId));
@@ -183,10 +185,11 @@ void DeviceCallbacks::LevelControlPostAttributeChangeCallback(chip::EndpointId e
     if (size == 1)
     {
         // ChipLogProgress(Zcl, "New level: %u ", *value);
-        ctColor.fBrighness = (float)*value;
-        wyColor = colorwidget.controlCCT(ctColor);
-        pwmWidget.pwmPulseWidth(wyColor);
-        printf("New level: %d\n", *value);
+        // ctColor.fBrighness = (float)*value;
+        hsvColor.byValue = *value;
+        // wyColor = colorwidget.controlCCT(ctColor);
+        // pwmWidget.pwmPulseWidthCct(wyColor);
+        // printf("New level: %d\n", *value);
     }
     else
     {
@@ -197,50 +200,53 @@ exit:
     return;
 }
 
-void DeviceCallbacks::ColorControlPostAttributeChangeCallback(chip::EndpointId endpointId, chip::AttributeId attributeId, uint16_t * value)
+void DeviceCallbacks::ColorControlPostAttributeChangeCallback(chip::EndpointId endpointId, chip::AttributeId attributeId, uint8_t * value)
 {
 
-    // VerifyOrExit(attributeId == ZCL_COLOR_CONTROL_CURRENT_HUE_ATTRIBUTE_ID && attributeId == ZCL_COLOR_CONTROL_CURRENT_SATURATION_ATTRIBUTE_ID,
-    //              ChipLogError(DeviceLayer, TAG, "Unhandled Attribute ID: '0x%04x", attributeId));
-    VerifyOrExit(attributeId == ZCL_COLOR_CONTROL_COLOR_TEMPERATURE_ATTRIBUTE_ID,
+    VerifyOrExit(attributeId != ZCL_COLOR_CONTROL_CURRENT_HUE_ATTRIBUTE_ID || attributeId != ZCL_COLOR_CONTROL_CURRENT_SATURATION_ATTRIBUTE_ID,
                  ChipLogError(DeviceLayer, TAG, "Unhandled Attribute ID: '0x%04x", attributeId));
+    // VerifyOrExit(attributeId == ZCL_COLOR_CONTROL_CURRENT_SATURATION_ATTRIBUTE_ID,
+    //              ChipLogError(DeviceLayer, TAG, "Unhandled Attribute ID: '0x%04x", attributeId));
     // VerifyOrExit(attributeId == ZCL_COLOR_CONTROL_COLOR_TEMPERATURE_ATTRIBUTE_ID,
     //              ChipLogError(DeviceLayer, TAG, "Unhandled Attribute ID: '0x%04x", attributeId));
     VerifyOrExit(endpointId == 1 || endpointId == 2,
                  ChipLogError(DeviceLayer, TAG, "Unexpected EndPoint ID: `0x%02x'", endpointId));
+    // hsvColor.byHue = deviceCallbacks.getHue(endpointId);
+    // hsvColor.bySaturation = deviceCallbacks.getSaturation(endpointId);
 
-    // if (attributeId == ZCL_COLOR_CONTROL_CURRENT_HUE_ATTRIBUTE_ID)
-    // {
-    //     hsvColor.byHue = *value;
-    //     emberAfReadServerAttribute(endpointId, ZCL_COLOR_CONTROL_CLUSTER_ID, ZCL_COLOR_CONTROL_CURRENT_HUE_ATTRIBUTE_ID,
-    //                                &hsvColor.bySaturation, sizeof(uint8_t));
-    // }
-    // if (attributeId == ZCL_COLOR_CONTROL_CURRENT_SATURATION_ATTRIBUTE_ID)
-    // {
-    //     hsvColor.bySaturation = *value;
-    //     emberAfReadServerAttribute(endpointId, ZCL_COLOR_CONTROL_CLUSTER_ID, ZCL_COLOR_CONTROL_CURRENT_SATURATION_ATTRIBUTE_ID, &hsvColor.byHue,
-    //                                sizeof(uint8_t));
-    // }
-    if (attributeId == ZCL_COLOR_CONTROL_COLOR_TEMPERATURE_ATTRIBUTE_ID)
+    if (attributeId == ZCL_COLOR_CONTROL_CURRENT_HUE_ATTRIBUTE_ID)
     {
-        ctColor.wCtMireds = *value;
+        hsvColor.fHue = (float)(*value * 360 / 254);
+        // emberAfReadServerAttribute(endpointId, ZCL_COLOR_CONTROL_CLUSTER_ID, ZCL_COLOR_CONTROL_CURRENT_SATURATION_ATTRIBUTE_ID,
+        //                            &hsvColor.fSaturation, sizeof(uint8_t));
+        printf("Get Hue: %.3f\n", hsvColor.fHue);
+    }
+    else if (attributeId == ZCL_COLOR_CONTROL_CURRENT_SATURATION_ATTRIBUTE_ID)
+    {
+        hsvColor.fSaturation = (float)(*value * 100 / 254);
+        // emberAfReadServerAttribute(endpointId, ZCL_COLOR_CONTROL_CLUSTER_ID, ZCL_COLOR_CONTROL_CURRENT_HUE_ATTRIBUTE_ID, &hsvColor.fHue,
+        //                            sizeof(uint8_t));
+        printf("Get Saturation: %.3f\n", hsvColor.fSaturation);
     }
     // if (attributeId == ZCL_COLOR_CONTROL_COLOR_TEMPERATURE_ATTRIBUTE_ID)
     // {
-    //     ctColor.dwCtMireds = *value;
+    //     ctColor.wCtMireds = *value;
     // }
     // rgbColor = colorwidget.cttToRgb(ctColor);
-    // rgbColor = colorwidget.hsvToRgb(hsvColor);
-    wyColor = colorwidget.controlCCT(ctColor);
-    pwmWidget.pwmPulseWidth(wyColor);
-    printf("White: %d Yellow: %d\n", wyColor.byWhite, wyColor.byYellow);
-    printf("CCT: %d\n", ctColor.wCtMireds);
+    rgbColor = colorwidget.hsvToRgb(hsvColor);
+    // wyColor = colorwidget.controlCCT(ctColor);
+    pwmWidget.pwmPulseWidthRgb(rgbColor);
+    // printf("White: %d Yellow: %d\n", wyColor.byWhite, wyColor.byYellow);
+    // printf("CCT: %d\n", ctColor.wCtMireds);
+    printf("Value: %d\n", hsvColor.byValue);
+    printf("Hue: %.3f\n", hsvColor.fHue);
+    printf("Saturation: %.3f\n", hsvColor.fSaturation);
 
 exit:
     return;
 }
 
-void DeviceCallbacks::WindowCoveringPostAttributeChangeCallback(EndpointId endpointId, AttributeId attributeId, uint16_t * value)
+void DeviceCallbacks::WindowCoveringPostAttributeChangeCallback(EndpointId endpointId, AttributeId attributeId, uint8_t * value)
 {
     VerifyOrExit(attributeId == ZCL_WC_MODE_ATTRIBUTE_ID,
                  ChipLogError(DeviceLayer, TAG, "Unhandled Attribute ID: '0x%04x", attributeId));
@@ -261,7 +267,7 @@ void IdentifyTimerHandler(Layer * systemLayer, void * appState, CHIP_ERROR error
     }
 }
 
-void DeviceCallbacks::OnIdentifyPostAttributeChangeCallback(EndpointId endpointId, AttributeId attributeId, uint16_t * value)
+void DeviceCallbacks::OnIdentifyPostAttributeChangeCallback(EndpointId endpointId, AttributeId attributeId, uint8_t * value)
 {
     VerifyOrExit(attributeId == ZCL_IDENTIFY_TIME_ATTRIBUTE_ID,
                  ChipLogError(DeviceLayer, "[%s] Unhandled Attribute ID: '0x%04x", TAG, attributeId));
