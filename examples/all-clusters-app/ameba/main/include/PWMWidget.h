@@ -1,6 +1,8 @@
 #pragma once
 #include "LEDWidget.h"
 #include "ColorWidget.h"
+#include <stdint.h>
+#include <stdbool.h>
 
 #define PWM_PERIOD 255
 
@@ -20,7 +22,10 @@ class PWMwidget
 {
     public:
         void pwmInit(void);
-        void pwmPulseWidthCct(WyColor_t wyColor);
-        void pwmPulseWidthRgb(RgbColor_t rgbColor);
+        void pwmPulseWidthCct(WyColor_t *wyColor);
+        void pwmPulseWidthRgb(RgbColor_t *rgbColor);
+        bool pwmCctChangeSmooth(WyColor_t *wyColor);
+        bool pwmRgbChangeSmooth(RgbColor_t *rgbColor);
+        void setTimeSmooth(uint32_t wTime);
     private:
 };

@@ -4,11 +4,10 @@
 #include "ColorWidget.h"
 
 #define LEVEL_MAX 254
+#define PULSE_MAX 255
 
-RgbColor_t Colorwidget::hsvToRgb(HsvColor_t hsv)
+void Colorwidget::hsvToRgb(HsvColor_t hsv, RgbColor_t *rgbColor)
 {
-    RgbColor_t rgb;
-
     uint16_t i       = (uint16_t)hsv.fHue / 60;
     uint16_t rgb_max = hsv.byValue;
     uint16_t rgb_min = (uint16_t)(rgb_max * (100 - hsv.fSaturation)) / 100;
@@ -18,85 +17,100 @@ RgbColor_t Colorwidget::hsvToRgb(HsvColor_t hsv)
     switch (i)
     {
         case 0:
-            rgb.byRed = LEVEL_MAX - (uint8_t) rgb_max;
-            rgb.byGreen = LEVEL_MAX - (uint8_t)(rgb_min + rgb_adj);
-            rgb.byBlue = LEVEL_MAX - (uint8_t) rgb_min;
-            break;
+        {
+            rgbColor->byDestinationRed = PULSE_MAX - (uint8_t) rgb_max;
+            rgbColor->byDestinationGreen = PULSE_MAX - (uint8_t)(rgb_min + rgb_adj);
+            rgbColor->byDestinationBlue = PULSE_MAX - (uint8_t) rgb_min;
+        }break;
         case 1:
-            rgb.byRed = LEVEL_MAX - (uint8_t)(rgb_max - rgb_adj);
-            rgb.byGreen = LEVEL_MAX - (uint8_t) rgb_max;
-            rgb.byBlue = LEVEL_MAX - (uint8_t) rgb_min;
-            break;
+        {
+            rgbColor->byDestinationRed = PULSE_MAX - (uint8_t)(rgb_max - rgb_adj);
+            rgbColor->byDestinationGreen = PULSE_MAX - (uint8_t) rgb_max;
+            rgbColor->byDestinationBlue = PULSE_MAX - (uint8_t) rgb_min;
+        }break;
         case 2:
-            rgb.byRed = LEVEL_MAX - (uint8_t) rgb_min;
-            rgb.byGreen = LEVEL_MAX - (uint8_t) rgb_max;
-            rgb.byBlue = LEVEL_MAX - (uint8_t)(rgb_min + rgb_adj);
-            break;
+        {
+            rgbColor->byDestinationRed = PULSE_MAX - (uint8_t) rgb_min;
+            rgbColor->byDestinationGreen = PULSE_MAX - (uint8_t) rgb_max;
+            rgbColor->byDestinationBlue = PULSE_MAX - (uint8_t)(rgb_min + rgb_adj);
+        }break;
         case 3:
-            rgb.byRed = LEVEL_MAX - (uint8_t) rgb_min;
-            rgb.byGreen = LEVEL_MAX - (uint8_t)(rgb_max - rgb_adj);
-            rgb.byBlue = LEVEL_MAX - (uint8_t) rgb_max;
-            break;
+        {
+            rgbColor->byDestinationRed = PULSE_MAX - (uint8_t) rgb_min;
+            rgbColor->byDestinationGreen = PULSE_MAX - (uint8_t)(rgb_max - rgb_adj);
+            rgbColor->byDestinationBlue = PULSE_MAX - (uint8_t) rgb_max;
+        }break;
         case 4:
-            rgb.byRed = LEVEL_MAX - (uint8_t)(rgb_min + rgb_adj);
-            rgb.byGreen = LEVEL_MAX - (uint8_t) rgb_min;
-            rgb.byBlue = LEVEL_MAX - (uint8_t) rgb_max;
-            break;
+        {
+            rgbColor->byDestinationRed = PULSE_MAX - (uint8_t)(rgb_min + rgb_adj);
+            rgbColor->byDestinationGreen = PULSE_MAX - (uint8_t) rgb_min;
+            rgbColor->byDestinationBlue = PULSE_MAX - (uint8_t) rgb_max;
+        }break;
+        case 5:
+        {
+            rgbColor->byDestinationRed = PULSE_MAX - (uint8_t) rgb_max;
+            rgbColor->byDestinationGreen = PULSE_MAX - (uint8_t) rgb_min;
+            rgbColor->byDestinationBlue = PULSE_MAX - (uint8_t)(rgb_max - rgb_adj);
+        }break;
         default:
-            rgb.byRed = LEVEL_MAX - (uint8_t) rgb_max;
-            rgb.byGreen = LEVEL_MAX - (uint8_t) rgb_min;
-            rgb.byBlue = LEVEL_MAX - (uint8_t)(rgb_max - rgb_adj);
-            break;
+        {
+            rgbColor->byDestinationRed = PULSE_MAX;
+            rgbColor->byDestinationGreen = PULSE_MAX;
+            rgbColor->byDestinationBlue = PULSE_MAX;
+        }break;
     }
-
-    return rgb;
 }
 
-WyColor_t Colorwidget::controlCCT(CtColor_t ct)
+void Colorwidget::controlCCT(CtColor_t ct, WyColor_t *wyColor)
 {
-    WyColor_t wy;
     uint8_t byTemperature = ct.wCtMireds;
 
     switch (byTemperature)
     {
         case yellowMax:
         {
-            wy.byYellow = PWM_PERIOD - ((((ct.wCtMireds + 256) * PWM_PERIOD) / (yellowMax + 256)) * (ct.fBrighness / LEVEL_MAX));
-            wy.byWhite = 255;
+            wyColor->byDestinationYellow = PWM_PERIOD - ((((ct.wCtMireds + 256) * PWM_PERIOD) / (yellowMax + 256)) * (ct.fBrighness / LEVEL_MAX));
+            wyColor->byDestinationWhite = PULSE_MAX;
         }break;
         case yellowMedium:
         {
-            wy.byYellow = PWM_PERIOD - ((((ct.wCtMireds + 256) * PWM_PERIOD) / (yellowMax + 256)) * (ct.fBrighness / LEVEL_MAX));
-            wy.byWhite = PWM_PERIOD - (wy.byYellow * (ct.fBrighness / LEVEL_MAX));
+            wyColor->byDestinationYellow = PWM_PERIOD - ((((ct.wCtMireds + 256) * PWM_PERIOD) / (yellowMax + 256)) * (ct.fBrighness / LEVEL_MAX));
+            wyColor->byDestinationWhite = PWM_PERIOD - (wyColor->byDestinationYellow * (ct.fBrighness / LEVEL_MAX));
         }break;
         case yellowMin:
         {
-            wy.byYellow = PWM_PERIOD - ((((ct.wCtMireds + 256) * PWM_PERIOD) / (yellowMax + 256)) * (ct.fBrighness / LEVEL_MAX));
-            wy.byWhite = PWM_PERIOD - (wy.byYellow * (ct.fBrighness / LEVEL_MAX));
+            wyColor->byDestinationYellow = PWM_PERIOD - ((((ct.wCtMireds + 256) * PWM_PERIOD) / (yellowMax + 256)) * (ct.fBrighness / LEVEL_MAX));
+            wyColor->byDestinationWhite = PWM_PERIOD - (wyColor->byDestinationYellow * (ct.fBrighness / LEVEL_MAX));
+        }break;
+        case yellowNeuter:
+        {
+            wyColor->byDestinationYellow = PWM_PERIOD - (((ct.wCtMireds  * PWM_PERIOD) / (yellowMax + 256)) * (ct.fBrighness / LEVEL_MAX));
+            wyColor->byDestinationWhite = PWM_PERIOD - (wyColor->byDestinationYellow * (ct.fBrighness / LEVEL_MAX));
         }break;
         case whiteMax:
         {
-            wy.byWhite = PWM_PERIOD - (((ct.wCtMireds * PWM_PERIOD) / whiteMax) * (ct.fBrighness / LEVEL_MAX));
-            wy.byYellow = 255;
+            wyColor->byDestinationWhite = PWM_PERIOD - (((ct.wCtMireds * PWM_PERIOD) / whiteMax) * (ct.fBrighness / LEVEL_MAX));
+            wyColor->byDestinationYellow = PULSE_MAX;
         }break;
         case whiteMedium:
         {
-            wy.byWhite = PWM_PERIOD - (((ct.wCtMireds * PWM_PERIOD) / whiteMax) * (ct.fBrighness / LEVEL_MAX));
-            wy.byYellow = PWM_PERIOD - (wy.byWhite * (ct.fBrighness / LEVEL_MAX));
+            wyColor->byDestinationWhite = PWM_PERIOD - (((ct.wCtMireds * PWM_PERIOD) / whiteMax) * (ct.fBrighness / LEVEL_MAX));
+            wyColor->byDestinationYellow = PWM_PERIOD - (wyColor->byDestinationWhite * (ct.fBrighness / LEVEL_MAX));
         }break;
         case whiteMin:
         {
-            wy.byWhite = PWM_PERIOD - (((ct.wCtMireds * PWM_PERIOD) / whiteMax) * (ct.fBrighness / LEVEL_MAX));
-            wy.byYellow = PWM_PERIOD - (wy.byWhite * (ct.fBrighness / LEVEL_MAX));
+            wyColor->byDestinationWhite = PWM_PERIOD - (((ct.wCtMireds * PWM_PERIOD) / whiteMax) * (ct.fBrighness / LEVEL_MAX));
+            wyColor->byDestinationYellow = PWM_PERIOD - (wyColor->byDestinationWhite * (ct.fBrighness / LEVEL_MAX));
+        }break;
+        case whiteNeuter:
+        {
+            wyColor->byDestinationWhite = PWM_PERIOD - (((ct.wCtMireds * PWM_PERIOD) / whiteMax) * (ct.fBrighness / LEVEL_MAX));
+            wyColor->byDestinationYellow = PWM_PERIOD - (wyColor->byDestinationWhite * (ct.fBrighness / LEVEL_MAX));
         }break;
         default:
-            break;
+        {
+            wyColor->byDestinationWhite = PULSE_MAX;
+            wyColor->byDestinationYellow = PULSE_MAX;
+        }break;
     }
-
-    printf("=================\n");
-    printf("Brighness: %.3f\n", (ct.fBrighness / LEVEL_MAX));
-    printf("Yellow: %d\n", wy.byYellow);
-    printf("White: %d\n", wy.byWhite);
-
-    return wy;
 }

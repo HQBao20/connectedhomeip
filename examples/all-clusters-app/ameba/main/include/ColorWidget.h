@@ -3,15 +3,20 @@
 
 typedef struct
 {
-    uint8_t byRed;
-    uint8_t byGreen;
-    uint8_t byBlue;
+    uint8_t byCurrentRed;
+    uint8_t byCurrentGreen;
+    uint8_t byCurrentBlue;
+    uint8_t byDestinationRed;
+    uint8_t byDestinationGreen;
+    uint8_t byDestinationBlue;
 }RgbColor_t;
 
 typedef struct
 {
-    uint8_t byWhite;
-    uint8_t byYellow;
+    uint8_t byCurrentWhite;
+    uint8_t byCurrentYellow;
+    uint8_t byDestinationWhite;
+    uint8_t byDestinationYellow;
 }WyColor_t;
 
 typedef struct
@@ -32,14 +37,16 @@ enum ColorTemperature
     yellowMax = 244,
     yellowMedium = 114,
     yellowMin = 77,
+    yellowNeuter = 182,
     whiteMax = 250,
     whiteMedium = 200,
-    whiteMin = 167
+    whiteMin = 167,
+    whiteNeuter = 154
 };
 
 class Colorwidget
 {
     public:
-        RgbColor_t hsvToRgb(HsvColor_t hsv);
-        WyColor_t controlCCT(CtColor_t ct);
+        void hsvToRgb(HsvColor_t hsv, RgbColor_t *rgbColor);
+        void controlCCT(CtColor_t ct, WyColor_t *wyColor);
 };

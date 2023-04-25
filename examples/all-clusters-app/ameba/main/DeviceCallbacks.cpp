@@ -43,6 +43,10 @@
 #include <ota/OTAInitializer.h>
 #endif
 
+#define TEMPERATURE_MIN 0
+#define HUE_MAX 360
+#define SATURATION_MAX 100
+
 #include "Globals.h"
 #include "LEDWidget.h"
 
@@ -63,8 +67,8 @@ constexpr uint32_t kInitOTARequestorDelaySec = 3;
 PWMwidget pwmWidget;
 Colorwidget colorwidget;
 HsvColor_t hsvColor;
-RgbColor_t rgbColor;
 CtColor_t ctColor;
+RgbColor_t rgbColor;
 WyColor_t wyColor;
 
 
@@ -185,11 +189,11 @@ void DeviceCallbacks::LevelControlPostAttributeChangeCallback(chip::EndpointId e
     if (size == 1)
     {
         // ChipLogProgress(Zcl, "New level: %u ", *value);
-        // ctColor.fBrighness = (float)*value;
+        ctColor.fBrighness = (float)*value;
         hsvColor.byValue = *value;
-        // wyColor = colorwidget.controlCCT(ctColor);
-        // pwmWidget.pwmPulseWidthCct(wyColor);
-        // printf("New level: %d\n", *value);
+        colorwidget.controlCCT(ctColor, &wyColor);
+        pwmWidget.pwmPulseWidthCct(&wyColor);
+        printf("New level: %d\n", *value);
     }
     else
     {
@@ -202,45 +206,50 @@ exit:
 
 void DeviceCallbacks::ColorControlPostAttributeChangeCallback(chip::EndpointId endpointId, chip::AttributeId attributeId, uint8_t * value)
 {
-
-    VerifyOrExit(attributeId != ZCL_COLOR_CONTROL_CURRENT_HUE_ATTRIBUTE_ID || attributeId != ZCL_COLOR_CONTROL_CURRENT_SATURATION_ATTRIBUTE_ID,
+    bool bCheckHueSatAttribute = false;
+    bool bCheckTemperAttribute = false;
+    VerifyOrExit(attributeId != ZCL_COLOR_CONTROL_CURRENT_HUE_ATTRIBUTE_ID || attributeId != ZCL_COLOR_CONTROL_CURRENT_SATURATION_ATTRIBUTE_ID ||
+                 attributeId != ZCL_COLOR_CONTROL_COLOR_TEMPERATURE_ATTRIBUTE_ID,
                  ChipLogError(DeviceLayer, TAG, "Unhandled Attribute ID: '0x%04x", attributeId));
-    // VerifyOrExit(attributeId == ZCL_COLOR_CONTROL_CURRENT_SATURATION_ATTRIBUTE_ID,
-    //              ChipLogError(DeviceLayer, TAG, "Unhandled Attribute ID: '0x%04x", attributeId));
-    // VerifyOrExit(attributeId == ZCL_COLOR_CONTROL_COLOR_TEMPERATURE_ATTRIBUTE_ID,
-    //              ChipLogError(DeviceLayer, TAG, "Unhandled Attribute ID: '0x%04x", attributeId));
     VerifyOrExit(endpointId == 1 || endpointId == 2,
                  ChipLogError(DeviceLayer, TAG, "Unexpected EndPoint ID: `0x%02x'", endpointId));
-    // hsvColor.byHue = deviceCallbacks.getHue(endpointId);
-    // hsvColor.bySaturation = deviceCallbacks.getSaturation(endpointId);
 
     if (attributeId == ZCL_COLOR_CONTROL_CURRENT_HUE_ATTRIBUTE_ID)
     {
         hsvColor.fHue = (float)(*value * 360 / 254);
-        // emberAfReadServerAttribute(endpointId, ZCL_COLOR_CONTROL_CLUSTER_ID, ZCL_COLOR_CONTROL_CURRENT_SATURATION_ATTRIBUTE_ID,
-        //                            &hsvColor.fSaturation, sizeof(uint8_t));
+        ctColor.wCtMireds = TEMPERATURE_MIN;
+        bCheckHueSatAttribute = true;
         printf("Get Hue: %.3f\n", hsvColor.fHue);
     }
     else if (attributeId == ZCL_COLOR_CONTROL_CURRENT_SATURATION_ATTRIBUTE_ID)
     {
         hsvColor.fSaturation = (float)(*value * 100 / 254);
-        // emberAfReadServerAttribute(endpointId, ZCL_COLOR_CONTROL_CLUSTER_ID, ZCL_COLOR_CONTROL_CURRENT_HUE_ATTRIBUTE_ID, &hsvColor.fHue,
-        //                            sizeof(uint8_t));
+        ctColor.wCtMireds = TEMPERATURE_MIN;
+        bCheckHueSatAttribute = true;
         printf("Get Saturation: %.3f\n", hsvColor.fSaturation);
     }
-    // if (attributeId == ZCL_COLOR_CONTROL_COLOR_TEMPERATURE_ATTRIBUTE_ID)
-    // {
-    //     ctColor.wCtMireds = *value;
-    // }
-    // rgbColor = colorwidget.cttToRgb(ctColor);
-    rgbColor = colorwidget.hsvToRgb(hsvColor);
-    // wyColor = colorwidget.controlCCT(ctColor);
-    pwmWidget.pwmPulseWidthRgb(rgbColor);
-    // printf("White: %d Yellow: %d\n", wyColor.byWhite, wyColor.byYellow);
-    // printf("CCT: %d\n", ctColor.wCtMireds);
+    else if (attributeId == ZCL_COLOR_CONTROL_COLOR_TEMPERATURE_ATTRIBUTE_ID)
+    {
+        ctColor.wCtMireds = *value;
+        hsvColor.fHue = HUE_MAX;
+        hsvColor.fSaturation = SATURATION_MAX;
+        bCheckTemperAttribute = true;
+        printf("Get CCT: %d\n", ctColor.wCtMireds);
+    }
+
+    if(bCheckTemperAttribute | bCheckHueSatAttribute)
+    {
+        colorwidget.controlCCT(ctColor, &wyColor);
+        colorwidget.hsvToRgb(hsvColor, &rgbColor);
+        pwmWidget.pwmPulseWidthRgb(&rgbColor);
+        pwmWidget.pwmPulseWidthCct(&wyColor);
+    }
+
     printf("Value: %d\n", hsvColor.byValue);
     printf("Hue: %.3f\n", hsvColor.fHue);
     printf("Saturation: %.3f\n", hsvColor.fSaturation);
+    printf("CCT: %d\n", ctColor.wCtMireds);
+    printf("Brighness: %.3f\n", ctColor.fBrighness);
 
 exit:
     return;
